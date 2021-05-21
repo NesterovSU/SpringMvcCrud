@@ -14,11 +14,16 @@
     <label for="name">Enter new name: </label>
     <input type="text" id="name" th:field="*{name}"/>
     <br>
-     <label for="age">Enter new age: </label>
+    <label for="age">Enter new age: </label>
     <input type="text" id="age" th:field="*{age}"/>
     <br>
-     <label for="email">Enter new email: </label>
+    <label for="email">Enter new email: </label>
     <input type="text" id="email" th:field="*{email}"/>
+    <div style="color:red">
+        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+        <div th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
+        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </div>
     <br>
     <input type="submit" value="Update">
 </form>

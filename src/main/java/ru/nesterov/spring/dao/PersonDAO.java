@@ -15,7 +15,7 @@ public class PersonDAO {
     private static int PEOPLE_COUNT;
     private List<Person> people;
     {
-        people = new ArrayList<Person>();
+        people = new ArrayList<>();
         people.add(new Person(++PEOPLE_COUNT, "Any", 23, "any@mail.ru"));
         people.add(new Person(++PEOPLE_COUNT,"Tony", 45, "tony@mail.ru"));
         people.add(new Person(++PEOPLE_COUNT,"Johny", 35, "johny@mail.ru"));

@@ -1,12 +1,32 @@
 package ru.nesterov.spring.model;
 
+
+
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Size;
+
+
 /**
  * @author Sergey Nesterov
  */
 public class Person {
+
     private int id;
+
+    @NotEmpty(message = "Name shouldn't be empty")
+    @Size(min=2, max = 15, message = "Name should be 2-15 symbols long")
     private String name;
+
+    @Max(value = 100, message = "Age should be value 10-100")
+    @Min(value = 10, message = "Age should be value 10-100")
     private int age;
+
+    @NotEmpty(message = "Email shouldn't be empty")
+    @Email(message = "Email should be valid")
     private String email;
 
     public Person(){}

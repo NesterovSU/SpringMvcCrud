@@ -3,9 +3,12 @@ package ru.nesterov.spring.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.nesterov.spring.dao.PersonDAO;
 import ru.nesterov.spring.model.Person;
+
+import javax.validation.Valid;
 
 /**
  * @author Sergey Nesterov
@@ -46,8 +49,12 @@ public class PeopleController {
     }
 
     @PostMapping("")
-    public String createPerson(@ModelAttribute("person") Person person, Model model){
+    public String createPerson(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, Model model){
 //        Создание одного человека в DAO
+
+        if(bindingResult.hasErrors()){
+            return "people/create";
+        }
         personDAO.create(person);
         int id = person.getId();
         model.addAttribute("person", personDAO.show(id));
@@ -55,8 +62,13 @@ public class PeopleController {
     }
 
     @PatchMapping("/{id}")
-    public String updatePerson(@ModelAttribute("person") Person person,@PathVariable("id") int id, Model model){
+    public String updatePerson(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, @PathVariable("id") int id){
 //        Редактирование одного человека в DAO
+
+        if(bindingResult.hasErrors()){
+            return "people/edit";
+        }
+
         personDAO.update( id, person);
         return "redirect:/people";
     }
