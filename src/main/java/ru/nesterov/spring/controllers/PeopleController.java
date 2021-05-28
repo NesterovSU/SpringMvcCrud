@@ -55,8 +55,7 @@ public class PeopleController {
         if(bindingResult.hasErrors()){
             return "people/create";
         }
-        personDAO.create(person);
-        int id = person.getId();
+        int id = personDAO.create(person);
         model.addAttribute("person", personDAO.show(id));
         return "people/show";
     }
