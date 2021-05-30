@@ -1,10 +1,12 @@
 package ru.nesterov.spring.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -23,8 +25,17 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan("ru.nesterov.spring")
 @EnableWebMvc
+@PropertySource("classpath:connectionToDataBase.properties")
 public class SpringConfig implements WebMvcConfigurer {
 
+    @Value("${driver}")
+    private String driver;
+    @Value("${url}")
+    private String url;
+    @Value("${login}")
+    private String login;
+    @Value("${password}")
+    private String password;
     private final ApplicationContext applicationContext;
 
     @Autowired
@@ -51,11 +62,12 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Bean
     public DataSource dataSource(){
+        System.out.println(driver + url + login + password);
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://localhost:5432/postgres");
-        dataSource.setUsername("postgres");
-        dataSource.setPassword("postgres");
+        dataSource.setDriverClassName(driver);
+        dataSource.setUrl(url);
+        dataSource.setUsername(login);
+        dataSource.setPassword(password);
         return dataSource;
     }
 

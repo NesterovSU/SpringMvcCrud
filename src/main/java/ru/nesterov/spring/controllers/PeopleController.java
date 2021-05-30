@@ -56,15 +56,25 @@ public class PeopleController {
             return "people/create";
         }
 
+        if (personDAO.isEmailAlreadyExist(person.getEmail())){
+            model.addAttribute("message", "This email address already belongs to another user");
+            return "people/create";
+        }
+
         model.addAttribute("person", personDAO.create(person));
         return "people/show";
     }
 
     @PatchMapping("/{id}")
-    public String updatePerson(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, @PathVariable("id") int id){
+    public String updatePerson(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, @PathVariable("id") int id, Model model){
 //        Редактирование одного человека в базе
 
         if(bindingResult.hasErrors()){
+            return "people/edit";
+        }
+
+        if (personDAO.isEmailBelongsToAnotherPerson(person)){
+            model.addAttribute("message", "This email address already belongs to another person");
             return "people/edit";
         }
 
