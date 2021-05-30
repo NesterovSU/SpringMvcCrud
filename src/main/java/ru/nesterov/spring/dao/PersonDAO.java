@@ -1,5 +1,8 @@
 package ru.nesterov.spring.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import ru.nesterov.spring.model.Person;
 
@@ -15,14 +18,12 @@ import static java.lang.Class.forName;
 
 @Component
 public class PersonDAO {
-    private static int PEOPLE_COUNT;
-    private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
-    private static final String LOGIN = "postgres";
-    private static final String PASSWORD = "postgres";
+
+    private final JdbcTemplate jdbcTemplate;
 
     private static final String SELECT_ALL = "SELECT * FROM public.person";
     private static final String SELECT_ID = "SELECT * FROM public.person WHERE id = ?";
-    private static final String SELECT_LAST_ID = "SELECT id FROM public.person ORDER BY id DESC LIMIT 1";
+    private static final String SELECT_LAST = "SELECT * FROM public.person ORDER BY id DESC LIMIT 1";
     private static final String INSERT_NEW = "INSERT INTO public.person (age,name,email) VALUES(?,?,?)";
     private static final String UPDATE_ID = "UPDATE public.person SET age = ?, name = ?, email = ? WHERE id = ?";
     private static final String DELETE_ID = "DELETE FROM public.person WHERE id = ?";
@@ -30,97 +31,45 @@ public class PersonDAO {
 
     private static Connection connection;
 
-
-    static {
-        try{
-            Class.forName("org.postgresql.Driver");}
-        catch(ClassNotFoundException e){
-            e.printStackTrace();
-        }
-
-        try {
-            connection = DriverManager.getConnection(URL,LOGIN,PASSWORD);
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-        }
+    @Autowired
+    public PersonDAO(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
 
     public List<Person> index(){
-        try (Statement statement = connection.createStatement();){
-            List<Person> people = new ArrayList<Person>();
-            ResultSet resultSet = statement.executeQuery(SELECT_ALL);
-            while (resultSet.next()){
-                Person person = new Person();
-                person.setId(resultSet.getInt("id"));
-                person.setAge(resultSet.getInt("age"));
-                person.setName(resultSet.getString("name"));
-                person.setEmail(resultSet.getString("email"));
-                people.add(person);
-            }
-            return people;
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-            return null;
-        }
-
+        return jdbcTemplate.query(SELECT_ALL, new PersonMapper());
     }
 
     public Person show(int id){
-        try (PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ID);){
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
+        return jdbcTemplate.<Person>query(SELECT_ID, new Object[]{id}, new PersonMapper())
+                .stream().findAny().orElse(null);
+    }
+
+    public Person create(Person person){
+        jdbcTemplate.update(INSERT_NEW, person.getAge(), person.getName(), person.getEmail());
+        return jdbcTemplate.query(SELECT_LAST, new PersonMapper())
+                .stream().findAny().orElse(null);
+    }
+
+    public void update(int id, Person person) {
+        jdbcTemplate.update(UPDATE_ID, person.getAge(), person.getName(), person.getEmail(), id);
+    }
+
+    public void delete(int id) {
+        jdbcTemplate.update(DELETE_ID, id);
+    }
+
+    public static class PersonMapper implements RowMapper<Person>{
+
+        @Override
+        public Person mapRow(ResultSet resultSet, int i) throws SQLException {
             Person person = new Person();
             person.setId(resultSet.getInt("id"));
             person.setAge(resultSet.getInt("age"));
             person.setName(resultSet.getString("name"));
             person.setEmail(resultSet.getString("email"));
             return person;
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-            return null;
-        }
-
-    }
-    public int create(Person person){
-        try(PreparedStatement preparedStatement = connection.prepareStatement(INSERT_NEW)){
-            preparedStatement.setInt(1, person.getAge());
-            preparedStatement.setString(2, person.getName());
-            preparedStatement.setString(3, person.getEmail());
-            int rows = preparedStatement.executeUpdate();
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-            return 0;
-        }
-        try(Statement statement = connection.createStatement()){
-            ResultSet resultSet = statement.executeQuery(SELECT_LAST_ID);
-            resultSet.next();
-            return resultSet.getInt("id");
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-            return 0;
-        }
-    }
-
-    public void update(int id, Person person) {
-        try(PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_ID)){
-            preparedStatement.setInt(4, id);
-            preparedStatement.setInt(1, person.getAge());
-            preparedStatement.setString(2, person.getName());
-            preparedStatement.setString(3, person.getEmail());
-            preparedStatement.executeUpdate();
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
-        }
-    }
-
-    public void delete(int id) {
-        try (PreparedStatement preparedStatement = connection.prepareStatement(DELETE_ID)){
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException sqlException) {
-            sqlException.printStackTrace();
         }
     }
 }

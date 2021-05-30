@@ -17,7 +17,6 @@ public class Person {
 
     private int id;
 
-    @NotEmpty(message = "Name shouldn't be empty")
     @Size(min=2, max = 15, message = "Name should be 2-15 symbols long")
     private String name;
 

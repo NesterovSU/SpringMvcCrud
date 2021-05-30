@@ -23,14 +23,14 @@ public class PeopleController {
 
     @GetMapping("")
     public String index(Model model){
-//        Получение всех людей
+//        Получение всех людей из базы
         model.addAttribute("people", personDAO.index());
         return "people/index";
     }
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id") int id, Model model){
-//        Получение одного человека по id
+//        Получение одного человека по id из базы
         model.addAttribute("person", personDAO.show(id));
         return "people/show";
     }
@@ -50,19 +50,19 @@ public class PeopleController {
 
     @PostMapping("")
     public String createPerson(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, Model model){
-//        Создание одного человека в DAO
+//        Создание одного человека в базе
 
         if(bindingResult.hasErrors()){
             return "people/create";
         }
-        int id = personDAO.create(person);
-        model.addAttribute("person", personDAO.show(id));
+
+        model.addAttribute("person", personDAO.create(person));
         return "people/show";
     }
 
     @PatchMapping("/{id}")
     public String updatePerson(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult, @PathVariable("id") int id){
-//        Редактирование одного человека в DAO
+//        Редактирование одного человека в базе
 
         if(bindingResult.hasErrors()){
             return "people/edit";
@@ -74,6 +74,7 @@ public class PeopleController {
 
     @DeleteMapping("/{id}")
     public String deletePerson(@PathVariable("id") int id){
+//        Удаление одного человека из базы
         personDAO.delete(id);
         return "redirect:/people";
     }
